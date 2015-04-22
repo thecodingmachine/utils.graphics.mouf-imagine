@@ -1,0 +1,30 @@
+{
+	"name" : "mouf/utils.graphics.mouf-imagine",
+	"description" : "Wrapper around the Imagine library, that allows to associate a set of Imagine Filters to an URL, like the LiipImagineBundle does for Symfony",
+	"type" : "mouf-library",
+	"authors" : [{
+			"name" : "Kevin Nguyen",
+			"email" : "k.nguyen@thecodingmachine.com",
+			"homepage" : "http://mouf-php.com"
+		}
+	],
+	"keywords" : [
+		"image cache", "mouf", "generate image", "thumbnail"
+	],
+	"homepage" : "https://github.com/thecodingmachine/utils.graphics.mouf-imagine",
+	"license" : [
+		"MIT"
+	],
+	"require" : {
+        "imagine/imagine": "dev-master",
+		"mouf/mouf-installer" : "~2.0",
+		"php" : ">=5.3.0",
+		"mouf/mouf-validators-interface" : "~2.0",
+        "mouf/mvc.splash": "~5.1"
+	},
+	"autoload" : {
+		"psr-0" : {
+			"Mouf" : "src/"
+		}
+	}
+}
