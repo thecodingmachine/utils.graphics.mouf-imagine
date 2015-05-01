@@ -14,7 +14,7 @@ Mouf Imagine uses the [imagine/imagine](https://github.com/avalanche123/Imagine)
 <td>
 <img  width="300px"  src="https://raw.githubusercontent.com/thecodingmachine/utils.graphics.mouf-imagine/1.0/doc/img/imagine.jpg" />
 </td>
-<td style="width: 20px;"> ==> </td>
+<td style="width: 20px;" align='center'> <font style="font-size: 60px">&#x21d2;</font> </td>
 <td>
 <img width="200px" src="https://raw.githubusercontent.com/thecodingmachine/utils.graphics.mouf-imagine/1.0/doc/img/imagine-preset.jpg" />
 </td>
@@ -35,6 +35,7 @@ This is very simple ! All you have to do is create an instance of the `ImagePres
 In fact, what this package does for you is : apply a set of imagine filters on the original image, and display the image after saving it in the desired folder. All the rest is done by Imaging filters.
 
 
+## Advanced features
 
-
+We will try to get some optimisations in Imagine code (more explicit constructors, etc...) so it will eb easier to integrate that library in mouf. Moreover, for advanced image manipulation, please chekout the [utils.graphics.mouf-imagine-addons](https://github.com/thecodingmachine/utils.graphics.mouf-imagine-addons) package that will soon provide helpers and predefined advanced filters around the exising ones.
 
