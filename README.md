@@ -30,7 +30,7 @@ Mouf Imagine uses the [imagine/imagine](https://github.com/avalanche123/Imagine)
 
 This is very simple ! All you have to do is create an instance of the `ImagePresetController` class :
 
-<img width="80%" src="https://raw.githubusercontent.com/thecodingmachine/utils.graphics.mouf-imagine/1.0/doc/img/simple-instannce.png" />
+<img width="80%" src="https://raw.githubusercontent.com/thecodingmachine/utils.graphics.mouf-imagine/1.0/doc/img/simple-instance.png" />
 
 In fact, what this package does for you is : apply a set of imagine filters on the original image, and display the image after saving it in the desired folder. All the rest is done by Imaging filters.
 
