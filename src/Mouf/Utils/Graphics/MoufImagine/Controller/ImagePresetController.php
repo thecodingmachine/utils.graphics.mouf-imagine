@@ -70,7 +70,7 @@ class ImagePresetController extends Controller{
         }
 
         $finalPath = ROOT_PATH . $this->url . DIRECTORY_SEPARATOR . $imagePath;
-        $subPath = substr($finalPath, 0, strrpos($finalPath, "/"));
+        $subPath = substr($finalPath, 0, strrpos($finalPath, DIRECTORY_SEPARATOR));
 
         if (!file_exists($subPath)){
             $oldUmask = umask();
