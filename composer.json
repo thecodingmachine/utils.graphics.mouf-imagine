@@ -16,7 +16,7 @@
 		"MIT"
 	],
 	"require" : {
-        "league/glide": "~1.0",
+        "imagine/imagine": "dev-master",
 		"mouf/mouf-installer" : "~2.0",
 		"php" : ">=5.3.0",
 		"mouf/mouf-validators-interface" : "~2.0",
