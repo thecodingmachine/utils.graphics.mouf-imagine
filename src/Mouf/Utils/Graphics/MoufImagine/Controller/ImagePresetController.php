@@ -6,6 +6,8 @@ use Imagine\Image\AbstractImagine;
 use Imagine\Imagick\Imagine;
 use Mouf\Mvc\Splash\Controllers\Controller;
 use Mouf\Mvc\Splash\UrlEntryPoint;
+use Mouf\Mvc\Splash\HtmlResponse;
+use Imagine\Exception\RuntimeException;
 
 class ImagePresetController extends Controller{
 
@@ -85,8 +87,10 @@ class ImagePresetController extends Controller{
         $image->save($finalPath);
 
         $format = self::$formats[exif_imagetype($finalPath)];
-
-        $image->show($format);
+        
+        $html = $image->get($format);
+        header('Content-type: '.$this->getMimeType($format));
+        return HtmlResponse::create($html, 200, ['Content-type' => $this->getMimeType($format)]);
     }
 
     /**
@@ -160,6 +164,53 @@ class ImagePresetController extends Controller{
         $this->image404 = $image404;
     }
 
+    /**
+     * Internal
+     *
+     * Normalizes a given format name
+     *
+     * @param string $format
+     *
+     * @return string
+     */
+    private function normalizeFormat($format)
+    {
+        $format = strtolower($format);
+    
+        if ('jpg' === $format || 'pjpeg' === $format) {
+            $format = 'jpeg';
+        }
+    
+        return $format;
+    }
 
-
+    /**
+     * Internal
+     *
+     * Get the mime type based on format.
+     *
+     * @param string $format
+     *
+     * @return string mime-type
+     *
+     * @throws RuntimeException
+     */
+    private function getMimeType($format)
+    {
+        $format = $this->normalizeFormat($format);
+    
+        if (!$this->supported($format)) {
+            throw new RuntimeException('Invalid format');
+        }
+    
+        static $mimeTypes = array(
+            'jpeg' => 'image/jpeg',
+            'gif'  => 'image/gif',
+            'png'  => 'image/png',
+            'wbmp' => 'image/vnd.wap.wbmp',
+            'xbm'  => 'image/xbm',
+        );
+    
+        return $mimeTypes[$format];
+    }
 }
