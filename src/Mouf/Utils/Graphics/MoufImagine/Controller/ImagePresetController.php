@@ -98,7 +98,7 @@ class ImagePresetController extends Controller{
      * @param string $image
      */
     public function baseImage($image){
-        $this->image($image);
+        return $this->image($image);
     }
 
     /**
@@ -107,7 +107,7 @@ class ImagePresetController extends Controller{
      * @param string path1
      */
     public function imageLevel1($image, $path1){
-        $this->image("$path1/$image");
+        return $this->image("$path1/$image");
     }
 
     /**
@@ -117,7 +117,7 @@ class ImagePresetController extends Controller{
      * @param string path2
      */
     public function imageLevel2($image, $path1, $path2){
-        $this->image("$path1/$path2/$image");
+        return $this->image("$path1/$path2/$image");
     }
 
     /**
@@ -128,7 +128,7 @@ class ImagePresetController extends Controller{
      * @param string path3
      */
     public function imageLevel3($image, $path1, $path2, $path3){
-        $this->image("$path1/$path2/$path3/$image");
+        return $this->image("$path1/$path2/$path3/$image");
     }
 
     /**
@@ -140,7 +140,7 @@ class ImagePresetController extends Controller{
      * @param string path4
      */
     public function imageLevel4($image, $path1, $path2, $path3, $path4){
-        $this->image("$path1/$path2/$path3/$path4/$image");
+        return $this->image("$path1/$path2/$path3/$path4/$image");
     }
 
     /**
@@ -153,7 +153,7 @@ class ImagePresetController extends Controller{
      * @param string path5
      */
     public function imageLevel5($image, $path1, $path2, $path3, $path4, $path5){
-        $this->image("$path1/$path2/$path3/$path4/$path5/$image");
+        return $this->image("$path1/$path2/$path3/$path4/$path5/$image");
     }
 
     /**
