@@ -16,7 +16,7 @@
 		"MIT"
 	],
 	"require" : {
-        "imagine/imagine": "dev-master",
+        "imagine/imagine": "~0.6",
 		"mouf/mouf-installer" : "~2.0",
 		"php" : ">=5.3.0",
 		"mouf/mouf-validators-interface" : "~2.0",
