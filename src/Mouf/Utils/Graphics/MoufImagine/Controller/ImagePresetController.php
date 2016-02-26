@@ -66,53 +66,44 @@ class ImagePresetController extends Controller{
             $defaultImagePath = ROOT_PATH.$this->image404;
             $extension = pathinfo($defaultImagePath, PATHINFO_EXTENSION);
             $finalPath = ROOT_PATH . $this->url . DIRECTORY_SEPARATOR . "default.".$extension;
-            $subPath = substr($finalPath, 0, strrpos($finalPath, DIRECTORY_SEPARATOR));
 
             if (!file_exists($finalPath)) {
-                $image = $this->imagine->open($defaultImagePath);
-                foreach ($this->filters as $filter){
-                    $image = $filter->apply($image);
-                }
-
-                if (!file_exists($subPath)){
-                    $oldUmask = umask();
-                    umask(0);
-                    $dirCreate = mkdir($subPath, 0775, true);
-                    umask($oldUmask);
-                    if (!$dirCreate) {
-                        throw new \Exception("Could't create subfolders '$subPath' in " . $finalPath);
-                    }
-                }
-
-                $image->save($finalPath);
+                $image = $this->generateImage($defaultImagePath, $finalPath);
             }
 
             return new RedirectResponse(ROOT_URL . $this->url . DIRECTORY_SEPARATOR . "default.".$extension);
         } else {
-            $image = $this->imagine->open($originalImagePath);
-            foreach ($this->filters as $filter){
-                $image = $filter->apply($image);
-            }
-
             $finalPath = ROOT_PATH . $this->url . DIRECTORY_SEPARATOR . $imagePath;
-            $subPath = substr($finalPath, 0, strrpos($finalPath, DIRECTORY_SEPARATOR));
 
-            if (!file_exists($subPath)){
-                $oldUmask = umask();
-                umask(0);
-                $dirCreate = mkdir($subPath, 0775, true);
-                umask($oldUmask);
-                if (!$dirCreate) {
-                    throw new \Exception("Could't create subfolders '$subPath' in " . ROOT_PATH . $this->getSavePath());
-                }
-            }
-
-            $image->save($finalPath);
+            $image = $this->generateImage($originalImagePath, $finalPath);
 
             $format = self::$formats[exif_imagetype($finalPath)];
 
             return $image->show($format);
         }
+    }
+
+    protected function generateImage ($src, $dest) {
+        $image = $this->imagine->open($src);
+        foreach ($this->filters as $filter){
+            $image = $filter->apply($image);
+        }
+
+        $subPath = substr($dest, 0, strrpos($dest, DIRECTORY_SEPARATOR));
+
+        if (!file_exists($subPath)){
+            $oldUmask = umask();
+            umask(0);
+            $dirCreate = mkdir($subPath, 0775, true);
+            umask($oldUmask);
+            if (!$dirCreate) {
+                throw new \Exception("Could't create subfolders '$subPath' in " . $dest);
+            }
+        }
+
+        $image->save($dest);
+
+        return $image;
     }
 
     /**
