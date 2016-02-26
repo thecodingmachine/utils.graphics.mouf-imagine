@@ -6,6 +6,7 @@ use Imagine\Image\AbstractImagine;
 use Imagine\Imagick\Imagine;
 use Mouf\Mvc\Splash\Controllers\Controller;
 use Mouf\Mvc\Splash\UrlEntryPoint;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class ImagePresetController extends Controller{
 
@@ -61,32 +62,32 @@ class ImagePresetController extends Controller{
         $originalImagePath = ROOT_PATH . $basePath . $imagePath;
 
         if (!file_exists($originalImagePath)){
-            $originalImagePath = ROOT_PATH . $this->image404;
-        }
-
-        $image = $this->imagine->open($originalImagePath);
-        foreach ($this->filters as $filter){
-            $image = $filter->apply($image);
-        }
-
-        $finalPath = ROOT_PATH . $this->url . DIRECTORY_SEPARATOR . $imagePath;
-        $subPath = substr($finalPath, 0, strrpos($finalPath, DIRECTORY_SEPARATOR));
-
-        if (!file_exists($subPath)){
-            $oldUmask = umask();
-            umask(0);
-            $dirCreate = mkdir($subPath, 0775, true);
-            umask($oldUmask);
-            if (!$dirCreate) {
-                throw new \Exception("Could't create subfolders '$subPath' in " . ROOT_PATH . $this->getSavePath());
+            return new RedirectResponse(ROOT_URL.$this->image404);
+        } else {
+            $image = $this->imagine->open($originalImagePath);
+            foreach ($this->filters as $filter){
+                $image = $filter->apply($image);
             }
+
+            $finalPath = ROOT_PATH . $this->url . DIRECTORY_SEPARATOR . $imagePath;
+            $subPath = substr($finalPath, 0, strrpos($finalPath, DIRECTORY_SEPARATOR));
+
+            if (!file_exists($subPath)){
+                $oldUmask = umask();
+                umask(0);
+                $dirCreate = mkdir($subPath, 0775, true);
+                umask($oldUmask);
+                if (!$dirCreate) {
+                    throw new \Exception("Could't create subfolders '$subPath' in " . ROOT_PATH . $this->getSavePath());
+                }
+            }
+
+            $image->save($finalPath);
+
+            $format = self::$formats[exif_imagetype($finalPath)];
+
+            return $image->show($format);
         }
-
-        $image->save($finalPath);
-
-        $format = self::$formats[exif_imagetype($finalPath)];
-
-        $image->show($format);
     }
 
     /**
@@ -94,7 +95,7 @@ class ImagePresetController extends Controller{
      * @param string $image
      */
     public function baseImage($image){
-        $this->image($image);
+        return $this->image($image);
     }
 
     /**
@@ -103,7 +104,7 @@ class ImagePresetController extends Controller{
      * @param string path1
      */
     public function imageLevel1($image, $path1){
-        $this->image("$path1/$image");
+        return $this->image("$path1/$image");
     }
 
     /**
@@ -113,7 +114,7 @@ class ImagePresetController extends Controller{
      * @param string path2
      */
     public function imageLevel2($image, $path1, $path2){
-        $this->image("$path1/$path2/$image");
+        return $this->image("$path1/$path2/$image");
     }
 
     /**
@@ -124,7 +125,7 @@ class ImagePresetController extends Controller{
      * @param string path3
      */
     public function imageLevel3($image, $path1, $path2, $path3){
-        $this->image("$path1/$path2/$path3/$image");
+        return $this->image("$path1/$path2/$path3/$image");
     }
 
     /**
@@ -136,7 +137,7 @@ class ImagePresetController extends Controller{
      * @param string path4
      */
     public function imageLevel4($image, $path1, $path2, $path3, $path4){
-        $this->image("$path1/$path2/$path3/$path4/$image");
+        return $this->image("$path1/$path2/$path3/$path4/$image");
     }
 
     /**
@@ -149,7 +150,7 @@ class ImagePresetController extends Controller{
      * @param string path5
      */
     public function imageLevel5($image, $path1, $path2, $path3, $path4, $path5){
-        $this->image("$path1/$path2/$path3/$path4/$path5/$image");
+        return $this->image("$path1/$path2/$path3/$path4/$path5/$image");
     }
 
     /**
