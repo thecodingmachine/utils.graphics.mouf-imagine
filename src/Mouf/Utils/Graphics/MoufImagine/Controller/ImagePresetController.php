@@ -57,6 +57,11 @@ class ImagePresetController extends Controller{
         $this->filters = $filters;
     }
 
+    /**
+     * @param $imagePath
+     * @return RedirectResponse|static
+     * @throws \Exception
+     */
     private function image($imagePath){
         $basePath = empty($this->originalPath) ? "" : ($this->originalPath . DIRECTORY_SEPARATOR);
         $originalImagePath = ROOT_PATH . $basePath . $imagePath;
@@ -83,7 +88,13 @@ class ImagePresetController extends Controller{
         }
     }
 
-    protected function generateImage ($src, $dest) {
+    /**
+     * @param $src
+     * @param $dest
+     * @return \Imagine\Image\ImageInterface
+     * @throws \Exception
+     */
+    private function generateImage ($src, $dest) {
         $image = $this->imagine->open($src);
         foreach ($this->filters as $filter){
             $image = $filter->apply($image);
