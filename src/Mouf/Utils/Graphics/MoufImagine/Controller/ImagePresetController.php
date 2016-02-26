@@ -61,8 +61,33 @@ class ImagePresetController extends Controller{
         $basePath = empty($this->originalPath) ? "" : ($this->originalPath . DIRECTORY_SEPARATOR);
         $originalImagePath = ROOT_PATH . $basePath . $imagePath;
 
+
         if (!file_exists($originalImagePath)){
-            return new RedirectResponse(ROOT_URL.$this->image404);
+            $defaultImagePath = ROOT_PATH.$this->image404;
+            $extension = pathinfo($defaultImagePath, PATHINFO_EXTENSION);
+            $finalPath = ROOT_PATH . $this->url . DIRECTORY_SEPARATOR . "default.".$extension;
+            $subPath = substr($finalPath, 0, strrpos($finalPath, DIRECTORY_SEPARATOR));
+
+            if (!file_exists($finalPath)) {
+                $image = $this->imagine->open($defaultImagePath);
+                foreach ($this->filters as $filter){
+                    $image = $filter->apply($image);
+                }
+
+                if (!file_exists($subPath)){
+                    $oldUmask = umask();
+                    umask(0);
+                    $dirCreate = mkdir($subPath, 0775, true);
+                    umask($oldUmask);
+                    if (!$dirCreate) {
+                        throw new \Exception("Could't create subfolders '$subPath' in " . $finalPath);
+                    }
+                }
+
+                $image->save($finalPath);
+            }
+
+            return new RedirectResponse(ROOT_URL . $this->url . DIRECTORY_SEPARATOR . "default.".$extension);
         } else {
             $image = $this->imagine->open($originalImagePath);
             foreach ($this->filters as $filter){
