@@ -57,37 +57,64 @@ class ImagePresetController extends Controller{
         $this->filters = $filters;
     }
 
+    /**
+     * @param $imagePath
+     * @return RedirectResponse|static
+     * @throws \Exception
+     */
     private function image($imagePath){
         $basePath = empty($this->originalPath) ? "" : ($this->originalPath . DIRECTORY_SEPARATOR);
         $originalImagePath = ROOT_PATH . $basePath . $imagePath;
 
+
         if (!file_exists($originalImagePath)){
-            return new RedirectResponse(ROOT_URL.$this->image404);
+            $defaultImagePath = ROOT_PATH.$this->image404;
+            $extension = pathinfo($defaultImagePath, PATHINFO_EXTENSION);
+            $finalPath = ROOT_PATH . $this->url . DIRECTORY_SEPARATOR . "default.".$extension;
+
+            if (!file_exists($finalPath)) {
+                $image = $this->generateImage($defaultImagePath, $finalPath);
+            }
+
+            return new RedirectResponse(ROOT_URL . $this->url . DIRECTORY_SEPARATOR . "default.".$extension);
         } else {
-            $image = $this->imagine->open($originalImagePath);
-            foreach ($this->filters as $filter){
-                $image = $filter->apply($image);
-            }
-
             $finalPath = ROOT_PATH . $this->url . DIRECTORY_SEPARATOR . $imagePath;
-            $subPath = substr($finalPath, 0, strrpos($finalPath, DIRECTORY_SEPARATOR));
 
-            if (!file_exists($subPath)){
-                $oldUmask = umask();
-                umask(0);
-                $dirCreate = mkdir($subPath, 0775, true);
-                umask($oldUmask);
-                if (!$dirCreate) {
-                    throw new \Exception("Could't create subfolders '$subPath' in " . ROOT_PATH . $this->getSavePath());
-                }
-            }
-
-            $image->save($finalPath);
+            $image = $this->generateImage($originalImagePath, $finalPath);
 
             $format = self::$formats[exif_imagetype($finalPath)];
 
             return $image->show($format);
         }
+    }
+
+    /**
+     * @param $src
+     * @param $dest
+     * @return \Imagine\Image\ImageInterface
+     * @throws \Exception
+     */
+    private function generateImage ($src, $dest) {
+        $image = $this->imagine->open($src);
+        foreach ($this->filters as $filter){
+            $image = $filter->apply($image);
+        }
+
+        $subPath = substr($dest, 0, strrpos($dest, DIRECTORY_SEPARATOR));
+
+        if (!file_exists($subPath)){
+            $oldUmask = umask();
+            umask(0);
+            $dirCreate = mkdir($subPath, 0775, true);
+            umask($oldUmask);
+            if (!$dirCreate) {
+                throw new \Exception("Could't create subfolders '$subPath' in " . $dest);
+            }
+        }
+
+        $image->save($dest);
+
+        return $image;
     }
 
     /**
