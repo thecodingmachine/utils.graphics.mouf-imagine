@@ -116,8 +116,7 @@ class ImagePresetController extends Controller{
                 throw new \Exception("Could't create subfolders '$subPath' in " . $dest);
             }
         }
-
-
+        
         $image->save($dest);
 
         return $image;
