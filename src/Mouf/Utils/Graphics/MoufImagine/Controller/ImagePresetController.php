@@ -4,6 +4,7 @@ namespace Mouf\Utils\Graphics\MoufImagine\Controller;
 use Imagine\Filter\FilterInterface;
 use Imagine\Image\AbstractImagine;
 use Imagine\Imagick\Imagine;
+use Imagine\Filter\Basic\Autorotate;
 use Mouf\Mvc\Splash\Controllers\Controller;
 use Mouf\Mvc\Splash\UrlEntryPoint;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -100,6 +101,10 @@ class ImagePresetController extends Controller{
             $image = $filter->apply($image);
         }
 
+        //Autocorate the rotation of the preset
+        $filterAutorotate = new Autorotate();
+        $filterAutorotate->apply($image);
+
         $subPath = substr($dest, 0, strrpos($dest, DIRECTORY_SEPARATOR));
 
         if (!file_exists($subPath)){
@@ -111,6 +116,7 @@ class ImagePresetController extends Controller{
                 throw new \Exception("Could't create subfolders '$subPath' in " . $dest);
             }
         }
+
 
         $image->save($dest);
 
