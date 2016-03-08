@@ -118,18 +118,18 @@ class ImagePresetController extends Controller{
     }
 
     /**
-     * Delete a preset
+     * Delete a preset of an image
      * @param $imagePath
      */
     private function deletePreset ($imagePath) {
         $finalPath = ROOT_PATH . $this->url . DIRECTORY_SEPARATOR . $imagePath;
-        if (file_exists($finalPath) && strpos($finalPath, '/original/') === false){
+        if (file_exists($finalPath)){
             unlink($finalPath);
         }
     }
 
     /**
-     * Create presets a media
+     * Create presets of an image
      * @param string $path
      */
     public static function createPresets($path = null) {
@@ -145,7 +145,7 @@ class ImagePresetController extends Controller{
     }
 
     /**
-     * Purge presets of a media
+     * Purge presets of an image
      * @param string $path
      */
     public static function purgePresets($path = null) {
