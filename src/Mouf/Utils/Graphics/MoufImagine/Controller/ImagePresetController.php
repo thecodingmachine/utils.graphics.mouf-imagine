@@ -5,6 +5,7 @@ use Imagine\Filter\FilterInterface;
 use Imagine\Image\AbstractImagine;
 use Imagine\Imagick\Imagine;
 use Imagine\Filter\Basic\Autorotate;
+use Mouf\MoufManager;
 use Mouf\Mvc\Splash\Controllers\Controller;
 use Mouf\Mvc\Splash\UrlEntryPoint;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -67,7 +68,6 @@ class ImagePresetController extends Controller{
         $basePath = empty($this->originalPath) ? "" : ($this->originalPath . DIRECTORY_SEPARATOR);
         $originalImagePath = ROOT_PATH . $basePath . $imagePath;
 
-
         if (!file_exists($originalImagePath)){
             $defaultImagePath = ROOT_PATH.$this->image404;
             $extension = pathinfo($defaultImagePath, PATHINFO_EXTENSION);
@@ -101,10 +101,6 @@ class ImagePresetController extends Controller{
             $image = $filter->apply($image);
         }
 
-        //Autocorate the rotation of the preset
-        $filterAutorotate = new Autorotate();
-        $filterAutorotate->apply($image);
-
         $subPath = substr($dest, 0, strrpos($dest, DIRECTORY_SEPARATOR));
 
         if (!file_exists($subPath)){
@@ -116,10 +112,53 @@ class ImagePresetController extends Controller{
                 throw new \Exception("Could't create subfolders '$subPath' in " . $dest);
             }
         }
-        
+
         $image->save($dest);
 
         return $image;
+    }
+
+    /**
+     * Delete a preset
+     * @param $imagePath
+     */
+    private function deletePreset ($imagePath) {
+        $finalPath = ROOT_PATH . $this->url . DIRECTORY_SEPARATOR . $imagePath;
+        if (file_exists($finalPath) && strpos($finalPath, '/original/') === false){
+            unlink($finalPath);
+        }
+    }
+
+    /**
+     * Create presets a media
+     * @param string $path
+     */
+    public static function createPresets($path = null) {
+        $moufManager = MoufManager::getMoufManager();
+        $instances = $moufManager->findInstances('Mouf\\Utils\\Graphics\\MoufImagine\\Controller\\ImagePresetController');
+        foreach ($instances as $instanceName) {
+            $instance = $moufManager->getInstance($instanceName);
+            if ($path && strpos($path, $instance->originalPath) !== false) {
+                $imagePath = substr($path, strlen($instance->originalPath) + 1);
+                $instance->image($imagePath);
+            }
+        }
+    }
+
+    /**
+     * Purge presets of a media
+     * @param string $path
+     */
+    public static function purgePresets($path = null) {
+        $moufManager = MoufManager::getMoufManager();
+        $instances = $moufManager->findInstances('Mouf\\Utils\\Graphics\\MoufImagine\\Controller\\ImagePresetController');
+        foreach ($instances as $instanceName) {
+            $instance = $moufManager->getInstance($instanceName);
+            if ($path && strpos($path, $instance->originalPath) !== false) {
+                $imagePath = substr($path, strlen($instance->originalPath) + 1);
+                $instance->deletePreset($imagePath);
+            }
+        }
     }
 
     /**
@@ -192,7 +231,4 @@ class ImagePresetController extends Controller{
     {
         $this->image404 = $image404;
     }
-
-
-
 }
