@@ -4,7 +4,6 @@ namespace Mouf\Utils\Graphics\MoufImagine\Controller;
 use Imagine\Filter\FilterInterface;
 use Imagine\Image\AbstractImagine;
 use Imagine\Imagick\Imagine;
-use Imagine\Filter\Basic\Autorotate;
 use Mouf\MoufManager;
 use Mouf\Mvc\Splash\Controllers\Controller;
 use Mouf\Mvc\Splash\UrlEntryPoint;
