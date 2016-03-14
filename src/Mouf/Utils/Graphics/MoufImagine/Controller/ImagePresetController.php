@@ -210,8 +210,7 @@ class ImagePresetController extends Controller{
         if (!isset($mimeTypes[$format])) {
             throw new RuntimeException('Invalid format');
         }
-
-    
+        
         return $mimeTypes[$format];
     }
 }
