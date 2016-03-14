@@ -198,11 +198,7 @@ class ImagePresetController extends Controller{
     private function getMimeType($format)
     {
         $format = $this->normalizeFormat($format);
-    
-        if (!$this->supported($format)) {
-            throw new RuntimeException('Invalid format');
-        }
-    
+
         static $mimeTypes = array(
             'jpeg' => 'image/jpeg',
             'gif'  => 'image/gif',
@@ -210,7 +206,11 @@ class ImagePresetController extends Controller{
             'wbmp' => 'image/vnd.wap.wbmp',
             'xbm'  => 'image/xbm',
         );
-    
+
+        if (!isset($mimeTypes[$format])) {
+            throw new RuntimeException('Invalid format');
+        }
+        
         return $mimeTypes[$format];
     }
 }
