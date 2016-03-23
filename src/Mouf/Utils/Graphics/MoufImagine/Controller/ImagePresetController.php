@@ -3,11 +3,10 @@ namespace Mouf\Utils\Graphics\MoufImagine\Controller;
 
 use Imagine\Filter\FilterInterface;
 use Imagine\Image\AbstractImagine;
-use Imagine\Imagick\Imagine;
+use Mouf\MoufManager;
 use Mouf\Mvc\Splash\Controllers\Controller;
 use Mouf\Mvc\Splash\UrlEntryPoint;
-use Mouf\Mvc\Splash\HtmlResponse;
-use Imagine\Exception\RuntimeException;
+use Zend\Diactoros\Response\RedirectResponse;
 
 class ImagePresetController extends Controller{
 
@@ -58,21 +57,53 @@ class ImagePresetController extends Controller{
         $this->filters = $filters;
     }
 
+    /**
+     * @param $imagePath
+     * @return RedirectResponse|static
+     * @throws \Exception
+     */
     private function image($imagePath){
         $basePath = empty($this->originalPath) ? "" : ($this->originalPath . DIRECTORY_SEPARATOR);
         $originalImagePath = ROOT_PATH . $basePath . $imagePath;
 
         if (!file_exists($originalImagePath)){
-            $originalImagePath = ROOT_PATH . $this->image404;
-        }
+            $defaultImagePath = ROOT_PATH.$this->image404;
+            $extension = pathinfo($defaultImagePath, PATHINFO_EXTENSION);
+            $finalPath = ROOT_PATH . $this->url . DIRECTORY_SEPARATOR . "default.".$extension;
 
-        $image = $this->imagine->open($originalImagePath);
+            if (!file_exists($finalPath)) {
+                $image = $this->generateImage($defaultImagePath, $finalPath);
+            }
+
+            return new RedirectResponse(ROOT_URL . $this->url . DIRECTORY_SEPARATOR . "default.".$extension);
+        } else {
+            $finalPath = ROOT_PATH . $this->url . DIRECTORY_SEPARATOR . $imagePath;
+
+            $image = $this->generateImage($originalImagePath, $finalPath);
+
+            $format = self::$formats[exif_imagetype($finalPath)];
+
+            $html = $image->get($format);
+            header('Content-type: '.$this->getMimeType($format));
+            return HtmlResponse::create($html, 200, ['Content-type' => $this->getMimeType($format)]);
+        }
+    }
+
+    /**
+     * @param $src
+     * @param $dest
+     * @return \Imagine\Image\ImageInterface
+     * @throws \Exception
+     */
+    private function generateImage ($src, $dest) {
+        $src = str_replace(['/', '\\'], [DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR], $src);
+        $dest = str_replace(['/', '\\'], [DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR], $dest);
+        $image = $this->imagine->open($src);
         foreach ($this->filters as $filter){
             $image = $filter->apply($image);
         }
 
-        $finalPath = ROOT_PATH . $this->url . DIRECTORY_SEPARATOR . $imagePath;
-        $subPath = substr($finalPath, 0, strrpos($finalPath, DIRECTORY_SEPARATOR));
+        $subPath = substr($dest, 0, strrpos($dest, DIRECTORY_SEPARATOR));
 
         if (!file_exists($subPath)){
             $oldUmask = umask();
@@ -80,17 +111,56 @@ class ImagePresetController extends Controller{
             $dirCreate = mkdir($subPath, 0775, true);
             umask($oldUmask);
             if (!$dirCreate) {
-                throw new \Exception("Could't create subfolders '$subPath' in " . ROOT_PATH . $this->getSavePath());
+                throw new \Exception("Could't create subfolders '$subPath' in " . $dest);
             }
         }
 
-        $image->save($finalPath);
+        $image->save($dest);
 
-        $format = self::$formats[exif_imagetype($finalPath)];
-        
-        $html = $image->get($format);
-        header('Content-type: '.$this->getMimeType($format));
-        return HtmlResponse::create($html, 200, ['Content-type' => $this->getMimeType($format)]);
+        return $image;
+    }
+
+    /**
+     * Delete a preset of an image
+     * @param $imagePath
+     */
+    private function deletePreset ($imagePath) {
+        $finalPath = ROOT_PATH . $this->url . DIRECTORY_SEPARATOR . $imagePath;
+        if (file_exists($finalPath)){
+            unlink($finalPath);
+        }
+    }
+
+    /**
+     * Create presets of an image
+     * @param string $path
+     */
+    public static function createPresets($path = null) {
+        $moufManager = MoufManager::getMoufManager();
+        $instances = $moufManager->findInstances('Mouf\\Utils\\Graphics\\MoufImagine\\Controller\\ImagePresetController');
+        foreach ($instances as $instanceName) {
+            $instance = $moufManager->getInstance($instanceName);
+            if ($path && strpos($path, $instance->originalPath) !== false) {
+                $imagePath = substr($path, strlen($instance->originalPath) + 1);
+                $instance->image($imagePath);
+            }
+        }
+    }
+
+    /**
+     * Purge presets of an image
+     * @param string $path
+     */
+    public static function purgePresets($path = null) {
+        $moufManager = MoufManager::getMoufManager();
+        $instances = $moufManager->findInstances('Mouf\\Utils\\Graphics\\MoufImagine\\Controller\\ImagePresetController');
+        foreach ($instances as $instanceName) {
+            $instance = $moufManager->getInstance($instanceName);
+            if ($path && strpos($path, $instance->originalPath) !== false) {
+                $imagePath = substr($path, strlen($instance->originalPath) + 1);
+                $instance->deletePreset($imagePath);
+            }
+        }
     }
 
     /**
@@ -167,26 +237,6 @@ class ImagePresetController extends Controller{
     /**
      * Internal
      *
-     * Normalizes a given format name
-     *
-     * @param string $format
-     *
-     * @return string
-     */
-    private function normalizeFormat($format)
-    {
-        $format = strtolower($format);
-    
-        if ('jpg' === $format || 'pjpeg' === $format) {
-            $format = 'jpeg';
-        }
-    
-        return $format;
-    }
-
-    /**
-     * Internal
-     *
      * Get the mime type based on format.
      *
      * @param string $format
@@ -210,7 +260,27 @@ class ImagePresetController extends Controller{
         if (!isset($mimeTypes[$format])) {
             throw new RuntimeException('Invalid format');
         }
-        
+
         return $mimeTypes[$format];
+    }
+
+    /**
+     * Internal
+     *
+     * Normalizes a given format name
+     *
+     * @param string $format
+     *
+     * @return string
+     */
+    private function normalizeFormat($format)
+    {
+        $format = strtolower($format);
+
+        if ('jpg' === $format || 'pjpeg' === $format) {
+            $format = 'jpeg';
+        }
+
+        return $format;
     }
 }
