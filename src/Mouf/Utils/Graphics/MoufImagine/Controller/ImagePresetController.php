@@ -95,13 +95,7 @@ class ImagePresetController extends Controller{
      * @throws \Exception
      */
     private function generateImage ($src, $dest) {
-        $image = $this->imagine->open($src);
-        foreach ($this->filters as $filter){
-            $image = $filter->apply($image);
-        }
-
         $subPath = substr($dest, 0, strrpos($dest, DIRECTORY_SEPARATOR));
-
         if (!file_exists($subPath)){
             $oldUmask = umask();
             umask(0);
@@ -112,7 +106,26 @@ class ImagePresetController extends Controller{
             }
         }
 
-        $image->save($dest);
+        $image = $this->imagine->open($src);
+        $extension = pathinfo($src, PATHINFO_EXTENSION);
+        if ($extension == 'gif') {
+            $image->layers()->coalesce();
+            foreach ($image->layers() as $layer) {
+                foreach ($this->filters as $filter){
+                    $layer = $filter->apply($layer);
+                }
+            }
+
+            $image->save($dest, array(
+                'animated' => true,
+            ));
+        } else {
+            foreach ($this->filters as $filter){
+                $image = $filter->apply($image);
+            }
+
+            $image->save($dest);
+        }
 
         return $image;
     }
