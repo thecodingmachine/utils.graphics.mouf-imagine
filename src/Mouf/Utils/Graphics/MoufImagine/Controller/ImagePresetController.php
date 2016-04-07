@@ -37,6 +37,12 @@ class ImagePresetController extends Controller{
      */
     private $image404;
 
+    /**
+     * Transform GIF as a single image
+     * @var bool
+     */
+    private $transformGif;
+
     private static $formats = [
         IMAGETYPE_JPEG => 'jpg',
         IMAGETYPE_PNG  => 'png',
@@ -50,12 +56,14 @@ class ImagePresetController extends Controller{
      * @param string $originalPath
      * @param AbstractImagine $imagine
      * @param FilterInterface[] $filters
+     * @param bool $transformGif
      */
-    public function __construct($url, $originalPath, AbstractImagine $imagine, $filters){
+    public function __construct($url, $originalPath, AbstractImagine $imagine, $filters, $transformGif){
         $this->url = $url;
         $this->originalPath = $originalPath;
         $this->imagine = $imagine;
         $this->filters = $filters;
+        $this->transformGif = $transformGif;
     }
 
     /**
@@ -109,16 +117,26 @@ class ImagePresetController extends Controller{
         $image = $this->imagine->open($src);
         $extension = pathinfo($src, PATHINFO_EXTENSION);
         if ($extension == 'gif') {
-            $image->layers()->coalesce();
-            foreach ($image->layers() as $layer) {
+            if ($this->transformGif == true) {
+                $layers = $image->layers();
+                $layer = $layers->get(0);
                 foreach ($this->filters as $filter){
                     $layer = $filter->apply($layer);
                 }
-            }
+                $layer->save($dest);
+            } else {
+                $image->layers()->coalesce();
+                $layers = $image->layers();
+                foreach ($layers as $layer) {
+                    foreach ($this->filters as $filter){
+                        $layer = $filter->apply($layer);
+                    }
+                }
 
-            $image->save($dest, array(
-                'animated' => true,
-            ));
+                $image->save($dest, array(
+                    'animated' => true,
+                ));
+            }
         } else {
             foreach ($this->filters as $filter){
                 $image = $filter->apply($image);
