@@ -56,9 +56,9 @@ class ImagePresetController extends Controller{
      * @param string $originalPath
      * @param AbstractImagine $imagine
      * @param FilterInterface[] $filters
-     * @param bool $transformGif
+     * @param bool $transformGif Transform GIF as a single image
      */
-    public function __construct($url, $originalPath, AbstractImagine $imagine, $filters, $transformGif){
+    public function __construct($url, $originalPath, AbstractImagine $imagine, $filters, $transformGif = true){
         $this->url = $url;
         $this->originalPath = $originalPath;
         $this->imagine = $imagine;
