@@ -6,6 +6,7 @@ use Imagine\Image\AbstractImagine;
 use Mouf\MoufManager;
 use Mouf\Mvc\Splash\Controllers\Controller;
 use Mouf\Mvc\Splash\UrlEntryPoint;
+use Zend\Diactoros\Response\HtmlResponse;
 use Zend\Diactoros\Response\RedirectResponse;
 
 class ImagePresetController extends Controller{
@@ -85,7 +86,7 @@ class ImagePresetController extends Controller{
 
             $html = $image->get($format);
             header('Content-type: '.$this->getMimeType($format));
-            return HtmlResponse::create($html, 200, ['Content-type' => $this->getMimeType($format)]);
+            return new HtmlResponse($html, 200, ['Content-type' => $this->getMimeType($format)]);
         }
     }
 
