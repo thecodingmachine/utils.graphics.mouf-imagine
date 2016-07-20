@@ -5,9 +5,9 @@ use Imagine\Filter\FilterInterface;
 use Imagine\Image\AbstractImagine;
 use Mouf\MoufManager;
 use Mouf\Mvc\Splash\Controllers\Controller;
-use Mouf\Mvc\Splash\UrlEntryPoint;
 use Zend\Diactoros\Response\HtmlResponse;
 use Zend\Diactoros\Response\RedirectResponse;
+use Mouf\Mvc\Splash\Annotations\URL;
 
 class ImagePresetController extends Controller{
 
@@ -165,7 +165,7 @@ class ImagePresetController extends Controller{
     }
 
     /**
-     * @URL {$this->url}/{image}
+     * @URL("{$this->url}/{image}")
      * @param string $image
      */
     public function baseImage($image){
@@ -173,7 +173,7 @@ class ImagePresetController extends Controller{
     }
 
     /**
-     * @URL {$this->url}/{path1}/{image}
+     * @URL("{$this->url}/{path1}/{image}")
      * @param string $image
      * @param string path1
      */
@@ -182,7 +182,7 @@ class ImagePresetController extends Controller{
     }
 
     /**
-     * @URL {$this->url}/{path1}/{path2}/{image}
+     * @URL("{$this->url}/{path1}/{path2}/{image}")
      * @param string $image
      * @param string path1
      * @param string path2
@@ -192,7 +192,7 @@ class ImagePresetController extends Controller{
     }
 
     /**
-     * @URL {$this->url}/{path1}/{path2}/{path3}/{image}
+     * @URL("{$this->url}/{path1}/{path2}/{path3}/{image}")
      * @param string $image
      * @param string path1
      * @param string path2
@@ -203,7 +203,7 @@ class ImagePresetController extends Controller{
     }
 
     /**
-     * @URL {$this->url}/{path1}/{path2}/{path3}/{path4}/{image}
+     * @URL("{$this->url}/{path1}/{path2}/{path3}/{path4}/{image}")
      * @param string $image
      * @param string path1
      * @param string path2
@@ -215,7 +215,7 @@ class ImagePresetController extends Controller{
     }
 
     /**
-     * @URL {$this->url}/{path1}/{path2}/{path3}/{path4}/{path5}/{image}
+     * @URL("{$this->url}/{path1}/{path2}/{path3}/{path4}/{path5}/{image}")
      * @param string $image
      * @param string path1
      * @param string path2
