@@ -37,6 +37,12 @@ class ImagePresetController extends Controller{
      */
     private $image404;
 
+    /**
+     * Transform GIF as a single image
+     * @var bool
+     */
+    private $transformGif;
+
     private static $formats = [
         IMAGETYPE_JPEG => 'jpg',
         IMAGETYPE_PNG  => 'png',
@@ -50,18 +56,19 @@ class ImagePresetController extends Controller{
      * @param string $originalPath
      * @param AbstractImagine $imagine
      * @param FilterInterface[] $filters
+     * @param bool $transformGif Transform GIF as a single image
      */
-    public function __construct($url, $originalPath, AbstractImagine $imagine, $filters){
+    public function __construct($url, $originalPath, AbstractImagine $imagine, $filters, $transformGif = true){
         $this->url = $url;
         $this->originalPath = $originalPath;
         $this->imagine = $imagine;
         $this->filters = $filters;
+        $this->transformGif = $transformGif;
     }
 
     /**
      * @param $imagePath
-     * @return RedirectResponse|static
-     * @throws \Exception
+     * @return HtmlResponse|RedirectResponse
      */
     private function image($imagePath){
         $basePath = empty($this->originalPath) ? "" : ($this->originalPath . DIRECTORY_SEPARATOR);
@@ -99,13 +106,8 @@ class ImagePresetController extends Controller{
     private function generateImage ($src, $dest) {
         $src = str_replace(['/', '\\'], [DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR], $src);
         $dest = str_replace(['/', '\\'], [DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR], $dest);
-        $image = $this->imagine->open($src);
-        foreach ($this->filters as $filter){
-            $image = $filter->apply($image);
-        }
 
         $subPath = substr($dest, 0, strrpos($dest, DIRECTORY_SEPARATOR));
-
         if (!file_exists($subPath)){
             $oldUmask = umask();
             umask(0);
@@ -116,8 +118,34 @@ class ImagePresetController extends Controller{
             }
         }
 
-        $image->save($dest);
-
+        $image = $this->imagine->open($src);
+        $extension = pathinfo($src, PATHINFO_EXTENSION);
+        if ($extension == 'gif') {
+            if ($this->transformGif == true) {
+                $layers = $image->layers();
+                $layer = $layers->get(0);
+                foreach ($this->filters as $filter){
+                    $layer = $filter->apply($layer);
+                }
+                $layer->save($dest);
+            } else {
+                $image->layers()->coalesce();
+                $layers = $image->layers();
+                foreach ($layers as $layer) {
+                    foreach ($this->filters as $filter){
+                        $layer = $filter->apply($layer);
+                    }
+                }
+                $image->save($dest, array(
+                    'animated' => true,
+                ));
+            }
+        } else {
+            foreach ($this->filters as $filter){
+                $image = $filter->apply($image);
+            }
+            $image->save($dest);
+        }
         return $image;
     }
 
@@ -167,6 +195,7 @@ class ImagePresetController extends Controller{
     /**
      * @URL("{$this->url}/{image}")
      * @param string $image
+     * @return HtmlResponse|RedirectResponse
      */
     public function baseImage($image){
         return $this->image($image);
@@ -176,6 +205,7 @@ class ImagePresetController extends Controller{
      * @URL("{$this->url}/{path1}/{image}")
      * @param string $image
      * @param string path1
+     * @return HtmlResponse|RedirectResponse
      */
     public function imageLevel1($image, $path1){
         return $this->image("$path1/$image");
@@ -186,6 +216,7 @@ class ImagePresetController extends Controller{
      * @param string $image
      * @param string path1
      * @param string path2
+     * @return HtmlResponse|RedirectResponse
      */
     public function imageLevel2($image, $path1, $path2){
         return $this->image("$path1/$path2/$image");
@@ -197,6 +228,7 @@ class ImagePresetController extends Controller{
      * @param string path1
      * @param string path2
      * @param string path3
+     * @return HtmlResponse|RedirectResponse
      */
     public function imageLevel3($image, $path1, $path2, $path3){
         return $this->image("$path1/$path2/$path3/$image");
@@ -209,6 +241,7 @@ class ImagePresetController extends Controller{
      * @param string path2
      * @param string path3
      * @param string path4
+     * @return HtmlResponse|RedirectResponse
      */
     public function imageLevel4($image, $path1, $path2, $path3, $path4){
         return $this->image("$path1/$path2/$path3/$path4/$image");
@@ -222,6 +255,7 @@ class ImagePresetController extends Controller{
      * @param string path3
      * @param string path4
      * @param string path5
+     * @return HtmlResponse|RedirectResponse
      */
     public function imageLevel5($image, $path1, $path2, $path3, $path4, $path5){
         return $this->image("$path1/$path2/$path3/$path4/$path5/$image");
@@ -244,7 +278,7 @@ class ImagePresetController extends Controller{
      *
      * @return string mime-type
      *
-     * @throws RuntimeException
+     * @throws \RuntimeException
      */
     private function getMimeType($format)
     {
@@ -259,7 +293,7 @@ class ImagePresetController extends Controller{
         );
 
         if (!isset($mimeTypes[$format])) {
-            throw new RuntimeException('Invalid format');
+            throw new \RuntimeException('Invalid format');
         }
 
         return $mimeTypes[$format];
