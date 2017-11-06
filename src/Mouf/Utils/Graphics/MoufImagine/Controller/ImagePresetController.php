@@ -38,6 +38,12 @@ class ImagePresetController extends Controller{
     private $image404;
 
     /**
+     * The Imagine Save options
+     * @var array
+     */
+    private $imageSaveOptions = [];
+
+    /**
      * Transform GIF as a single image
      * @var bool
      */
@@ -127,7 +133,7 @@ class ImagePresetController extends Controller{
                 foreach ($this->filters as $filter){
                     $layer = $filter->apply($layer);
                 }
-                $layer->save($dest);
+                $layer->save($dest, $this->imageSaveOptions);
             } else {
                 $image->layers()->coalesce();
                 $layers = $image->layers();
@@ -136,15 +142,15 @@ class ImagePresetController extends Controller{
                         $layer = $filter->apply($layer);
                     }
                 }
-                $image->save($dest, array(
+                $image->save($dest, array_merge(array(
                     'animated' => true,
-                ));
+                ), $this->imageSaveOptions));
             }
         } else {
             foreach ($this->filters as $filter){
                 $image = $filter->apply($image);
             }
-            $image->save($dest);
+            $image->save($dest, $this->imageSaveOptions);
         }
         return $image;
     }
@@ -323,4 +329,13 @@ class ImagePresetController extends Controller{
 
         return $format;
     }
+
+    /**
+     * @param array $imageSaveOptions
+     */
+    public function setImageSaveOptions($imageSaveOptions)
+    {
+        $this->imageSaveOptions = $imageSaveOptions;
+    }
+
 }
