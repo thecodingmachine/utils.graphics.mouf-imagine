@@ -191,7 +191,7 @@ class ImagePresetController extends Controller{
      * Purge presets of an image
      * @param string $path
      */
-    public static function purgePresets($path = null) {
+    public static function purgePresets($path = null, $callback = null) {
         $moufManager = MoufManager::getMoufManager();
         $instances = $moufManager->findInstances('Mouf\\Utils\\Graphics\\MoufImagine\\Controller\\ImagePresetController');
         foreach ($instances as $instanceName) {
@@ -199,6 +199,11 @@ class ImagePresetController extends Controller{
             if ($path && strpos($path, $instance->originalPath) !== false) {
                 $imagePath = substr($path, strlen($instance->originalPath) + 1);
                 $instance->deletePreset($imagePath);
+                
+                if(is_callable($callback)) {
+                    $finalPath = ROOT_PATH . $instance->url . DIRECTORY_SEPARATOR . $imagePath;
+                    $callback($finalPath);
+                }
             }
         }
     }
