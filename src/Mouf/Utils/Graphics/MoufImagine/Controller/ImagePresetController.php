@@ -49,6 +49,12 @@ class ImagePresetController extends Controller{
      */
     private $transformGif;
 
+    /**
+     * Enable the application of the the preset when performing createPresets
+     * @var bool
+     */
+    private $createPresetsEnabled;
+
     private static $formats = [
         IMAGETYPE_JPEG => 'jpg',
         IMAGETYPE_PNG  => 'png',
@@ -63,13 +69,16 @@ class ImagePresetController extends Controller{
      * @param AbstractImagine $imagine
      * @param FilterInterface[] $filters
      * @param bool $transformGif Transform GIF as a single image
+     * @param bool $createPresetsEnabled Enable the application of the the preset when performing createPresets
      */
-    public function __construct($url, $originalPath, AbstractImagine $imagine, $filters, $transformGif = true){
+    public function __construct($url, $originalPath, AbstractImagine $imagine, $filters, $transformGif = true,
+                                $createPresetsEnabled = true){
         $this->url = $url;
         $this->originalPath = $originalPath;
         $this->imagine = $imagine;
         $this->filters = $filters;
         $this->transformGif = $transformGif;
+        $this->createPresetsEnabled = $createPresetsEnabled;
     }
 
     /**
@@ -175,7 +184,7 @@ class ImagePresetController extends Controller{
         $instances = $moufManager->findInstances('Mouf\\Utils\\Graphics\\MoufImagine\\Controller\\ImagePresetController');
         foreach ($instances as $instanceName) {
             $instance = $moufManager->getInstance($instanceName);
-            if ($path && strpos($path, $instance->originalPath) !== false) {
+            if ($path && strpos($path, $instance->originalPath) !== false && $instance->createPresetsEnabled === true) {
                 $imagePath = substr($path, strlen($instance->originalPath) + 1);
                 $instance->image($imagePath);
 
