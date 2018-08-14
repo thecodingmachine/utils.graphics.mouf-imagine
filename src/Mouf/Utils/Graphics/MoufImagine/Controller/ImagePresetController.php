@@ -69,7 +69,7 @@ class ImagePresetController extends Controller{
      * @param AbstractImagine $imagine
      * @param FilterInterface[] $filters
      * @param bool $transformGif Transform GIF as a single image
-     * @param bool $createPresetsEnabled Enable the preset when performing createPresets (default: true)
+     * @param bool $createPresetsEnabled Enable the preset application when performing createPresets (default: true)
      */
     public function __construct($url, $originalPath, AbstractImagine $imagine, $filters, $transformGif = true,
                                 $createPresetsEnabled = true){
