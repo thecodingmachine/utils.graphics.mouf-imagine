@@ -39,5 +39,5 @@ In fact, what this package does for you is : apply a set of imagine filters on t
 
 ## Advanced features
 
-We will try to get some optimisations in Imagine code (more explicit constructors, etc...) so it will eb easier to integrate that library in mouf. Moreover, for advanced image manipulation, please chekout the [utils.graphics.mouf-imagine-addons](https://github.com/thecodingmachine/utils.graphics.mouf-imagine-addons) package that will soon provide helpers and predefined advanced filters around the exising ones.
+We will try to get some optimisations in Imagine code (more explicit constructors, etc...) so it will be easier to integrate that library in mouf. Moreover, for advanced image manipulation, please chekout the [utils.graphics.mouf-imagine-addons](https://github.com/thecodingmachine/utils.graphics.mouf-imagine-addons) package that will soon provide helpers and predefined advanced filters around the exising ones.
 
