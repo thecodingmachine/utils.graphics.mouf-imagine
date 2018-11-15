@@ -3,6 +3,7 @@ namespace Mouf\Utils\Graphics\MoufImagine\Controller;
 
 use Imagine\Filter\FilterInterface;
 use Imagine\Image\AbstractImagine;
+use Imagine\Image\ImageInterface;
 use Mouf\MoufManager;
 use Mouf\Mvc\Splash\Controllers\Controller;
 use Zend\Diactoros\Response\HtmlResponse;
@@ -159,6 +160,7 @@ class ImagePresetController extends Controller{
             foreach ($this->filters as $filter){
                 $image = $filter->apply($image);
             }
+            $image->interlace(ImageInterface::INTERLACE_PLANE);
             $image->save($dest, $this->imageSaveOptions);
         }
         return $image;
