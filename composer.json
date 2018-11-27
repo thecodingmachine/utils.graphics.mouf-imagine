@@ -20,7 +20,7 @@
 		"mouf/mouf-installer" : "~2.0",
 		"php" : ">=7.0",
 		"mouf/mouf-validators-interface" : "~2.0",
-        "mouf/mvc.splash": "~8.0"
+		"mouf/mvc.splash": "^10"
 	},
 	"autoload" : {
 		"psr-0" : {
