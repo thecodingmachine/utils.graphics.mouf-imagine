@@ -8,7 +8,8 @@ use Mouf\MoufManager;
 use Mouf\Mvc\Splash\Controllers\Controller;
 use Zend\Diactoros\Response\HtmlResponse;
 use Zend\Diactoros\Response\RedirectResponse;
-use Mouf\Mvc\Splash\Annotations\URL;
+use TheCodingMachine\Splash\Annotations\URL;
+
 
 class ImagePresetController extends Controller{
 
